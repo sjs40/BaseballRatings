@@ -1,4 +1,6 @@
 from Batter import Batter
+from Player import Player
+from Team import Team
 
 class League:
 
@@ -6,6 +8,7 @@ class League:
     def __init__(self, batters, fielders):
         self.batters = batters
         self.fielders = fielders
+        self.players = []
         self.avg_batter = None
         self.mlb_hr_per_h = []
         self.mlb_power_stats = []
@@ -15,6 +18,14 @@ class League:
         self.teamIDs = ['ARI', 'ATL', 'BAL', 'BOS', 'CHA', 'CHN', 'CIN', 'CLE', 'COL', 'DET',
                         'HOU', 'KCA', 'LAA', 'LAN', 'MIA', 'MIL', 'MIN', 'NYA', 'NYN', 'OAK',
                         'PHI', 'PIT', 'SDN', 'SEA', 'SFN', 'SLN', 'TBA', 'TEX', 'TOR', 'WAS']
+        self.teams = {'ARI': Team('ARI'), 'ATL': Team('ATL'), 'BAL': Team('BAL'), 'BOS': Team('BOS'),
+                      'CHA': Team('CHA'), 'CHN': Team('CHN'), 'CIN': Team('CIN'), 'CLE': Team('CLE'),
+                      'COL': Team('COL'), 'DET': Team('DET'), 'HOU': Team('HOU'), 'KCA': Team('KCA'),
+                      'LAA': Team('LAA'), 'LAN': Team('LAN'), 'MIA': Team('MIA'), 'MIL': Team('MIL'),
+                      'MIN': Team('MIN'), 'NYA': Team('NYA'), 'NYN': Team('NYN'), 'OAK': Team('OAK'),
+                      'PHI': Team('PHI'), 'PIT': Team('PIT'), 'SDN': Team('SDN'), 'SEA': Team('SEA'),
+                      'SFN': Team('SFN'), 'SLN': Team('SLN'), 'TBA': Team('TBA'), 'TEX': Team('TEX'),
+                      'TOR': Team('TOR'), 'WAS': Team('WAS')}
 
     def condense_batters(self):
         new_batters = []
@@ -32,33 +43,39 @@ class League:
         self.batters = new_batters
 
     def condense_fielders(self):
-        new_fielders = []
-        temp_fielder = None
-        for f in self.fielders:
-            if temp_fielder == None:
-                temp_fielder = f
-            elif temp_fielder.playerID != f.playerID:
-                new_fielders.append(temp_fielder)
-                temp_fielder = f
-            else:
-                combined_f = temp_fielder.combine_fielder(f)
-                temp_fielder = combined_f
-        new_fielders.append(temp_fielder)
-        self.fielders = new_fielders
+        one_pos_fielders = []
+        one_pos_temp_f = None
+        one_team_fielders = []
+        one_team_temp_f = None
 
-        new_fielders = []
-        temp_fielder = None
+        max_games = 0
         for f in self.fielders:
-            if temp_fielder == None:
-                temp_fielder = f
-            elif temp_fielder.playerID != f.playerID:
-                new_fielders.append(temp_fielder)
-                temp_fielder = f
+            if one_pos_temp_f == None:
+                one_pos_temp_f = f
+                max_games = f.g
+            elif one_pos_temp_f.playerID != f.playerID:
+                one_pos_fielders.append(one_pos_temp_f)
+                one_pos_temp_f = f
+                max_games = f.g
             else:
-                combined_f = temp_fielder.combine_fielder_pos(f)
-                temp_fielder = combined_f
-        new_fielders.append(temp_fielder)
-        self.fielders = new_fielders
+                max_games = max(max_games, f.g)
+                combined_f = one_pos_temp_f.combine_fielder_pos(f, max_games)
+                one_pos_temp_f = combined_f
+        one_pos_fielders.append(one_pos_temp_f)
+
+        for f in one_pos_fielders:
+            if one_team_temp_f == None:
+                one_team_temp_f = f
+            elif one_team_temp_f.playerID != f.playerID:
+                one_team_fielders.append(one_team_temp_f)
+                one_team_temp_f = f
+            elif one_team_temp_f.pos == f.pos:
+                combined_f = one_team_temp_f.combine_fielder(f)
+                one_team_temp_f = combined_f
+        one_team_fielders.append(one_team_temp_f)
+
+
+        self.fielders = one_team_fielders
 
     def calculate_avg_batter(self):
         g = 0
@@ -127,3 +144,11 @@ class League:
         for b in self.batters:
             b.get_power_rating(self)
             b.get_speed_score()
+
+    def set_players(self):
+        for b, f in zip(self.batters, self.fielders):
+            if b.playerID == f.playerID:
+                player = Player(b, f)
+                player.set_speed_label()
+                self.players.append(player)
+                self.teams[player.teamID].add_player(player)

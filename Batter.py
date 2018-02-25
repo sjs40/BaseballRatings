@@ -33,7 +33,7 @@ class Batter:
         self.power_rate = 0
         self.slg = float((self.h + self.b2 + (self.b3 * 2) + (self.hr * 3)) / self.ab) if self.ab != 0 else 0.0
         self.pct_hr = 0
-        self.speed_label = 'N/A'
+        self.speed_score = 0
 
     def set_position(self, pos):
         self.position = pos
@@ -79,18 +79,18 @@ class Batter:
         self.power_rate = ((pct_hr_per_h * 0.85) + (pct_slg * 0.15)) * hr_multiplier
 
     def get_f1(self):
-        term1 = ((1.0 * (self.sb + 3)) / (1.0 * (self.sb + self.cs + 7))) - 0.4 if (self.sb + self.cs + 7) != 0 else -0.4
-        return 20 * term1
+        term1 = ((1.0 * (self.sb + 3)) / (1.0 * (self.sb + self.cs + 7))) if (self.sb + self.cs + 7) != 0 else 0
+        return 20 * (term1 - 0.4)
 
     def get_f2(self):
-        term1 = 1 / 0.07
+        term1 = 0.07
         b1 = self.h - self.b2 - self.b3 - self.hr
         term2 = (1.0 * (self.sb + self.cs)) / (1.0 * (b1 + self.bb + self.hbp)) if (b1 + self.bb + self.hbp) != 0 else 0
-        return term1 * math.sqrt(term2)
+        return (math.sqrt(term2) * 1.0) / term1
 
     def get_f3(self):
         term1 = (1.0 * self.b3) / (self.ab - self.hr - self.so) if (self.ab - self.hr - self.so) != 0 else 0
-        return 625 * term1
+        return (term1 * 1.0) / 0.0016
 
     def get_f4(self):
         term1 = (1.0 * (self.r - self.hr)) / (1.0 * (self.h + self.bb + self.hbp - self.hr)) if (self.h + self.bb + self.hbp - self.hr) != 0 else 0
@@ -98,21 +98,7 @@ class Batter:
 
     def get_f5(self):
         term1 = (1.0 * self.gidp) / (1.0 * (self.ab - self.hr - self.so)) if (self.ab - self.hr - self.so) != 0 else 0
-        return (1 / 0.007) * (0.063 - term1)
+        return (0.063 - term1) / 0.007
 
-    def get_speed_score(self):
-        speed_score = (self.get_f1() + self.get_f2() + self.get_f3() + self.get_f4() + self.get_f5()) / 5
-        if speed_score >= 7.0:
-            self.speed_label = 'Excellent'
-        elif speed_score >= 6.0:
-            self.speed_label = 'Great'
-        elif speed_score >=  5.5:
-            self.speed_label = 'Above Average'
-        elif speed_score >= 4.5:
-            self.speed_label = 'Average'
-        elif speed_score >= 4.0:
-            self.speed_label = 'Below Average'
-        elif speed_score >= 3.0:
-            self.speed_label = 'Poor'
-        else:
-            self.speed_label = 'Awful'
+    def set_speed_score(self):
+        self.speed_score = (self.get_f1() + self.get_f2() + self.get_f3() + self.get_f4() + self.get_f5())

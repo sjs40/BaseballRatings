@@ -23,10 +23,12 @@ prev_fielder = None
 cur.execute(sql)
 
 for row in cur:
-    batter = Batter(row['nameFirst'], row['nameLast'], row['Batting.playerID'],  row['Batting.stint'],
-                    row['Batting.teamID'], row['Batting.lgID'], row['Batting.G'],
+    batter = Batter(row['nameFirst'], row['nameLast'],
+                    row['playerID'],
+                    row['stint'],
+                    row['teamID'], row['lgID'], row['G'],
                     row['AB'], row['R'], row['H'], row['2B'], row['3B'], row['HR'],
-                    row['RBI'], row['Batting.SB'], row['Batting.CS'], row['BB'], row['SO'], row['IBB'],
+                    row['RBI'], row['SB'], row['CS'], row['BB'], row['SO'], row['IBB'],
                     row['HBP'], row['SH'], row['SF'], row['GIDP'])
     batters.append(batter)
 
@@ -46,6 +48,7 @@ for row in cur:
 league = League(batters, fielders)
 league.condense_batters()
 league.condense_fielders()
+league.set_players()
 
 '''
 for b in league.batters:
@@ -58,7 +61,7 @@ for b in league.batters:
         if int(row[1]) > games:
             prime_pos = row[0]
     b.set_position(prime_pos)
-'''
+
 
 league.calculate_avg_batter()
 league.set_batter_ratings()
@@ -69,3 +72,8 @@ for b in team.batters:
         b.firstName + " "
         + b.lastName + " "
         + b.position + " Speed: " + b.speed_label)
+'''
+
+team = league.teams['CHN']
+for p in team.players:
+    print(p.firstName + " " + p.lastName + " " + p.position + " Speed score: " + str(p.speed_score))

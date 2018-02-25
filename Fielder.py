@@ -26,8 +26,8 @@ class Fielder:
                        self.e + other.e, self.dp + other.dp, self.pb + other.pb, self.wp + other.wp,
                        self.sb + other.sb, self.cs + other.cs, self.zr + other.zr)
 
-    def combine_fielder_pos(self, other):
-        prime_pos = self.pos if self.g > other.g else other.pos
+    def combine_fielder_pos(self, other, max_games):
+        prime_pos = self.pos if max_games > other.g else other.pos
         return Fielder(self.firstName, self.lastName, self.playerID, self.stint, self.teamID, prime_pos,
                        self.g + other.g, self.gs + other.gs, self.innOuts + other.innOuts, self.po + other.po,
                        self.a + other.a, self.e + other.e, self.dp + other.dp, self.pb + other.pb,
