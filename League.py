@@ -3,8 +3,9 @@ from Batter import Batter
 class League:
 
 
-    def __init__(self, batters):
+    def __init__(self, batters, fielders):
         self.batters = batters
+        self.fielders = fielders
         self.avg_batter = None
         self.mlb_hr_per_h = []
         self.mlb_power_stats = []
@@ -29,6 +30,35 @@ class League:
                 temp_batter = combined_b
         new_batters.append(temp_batter)
         self.batters = new_batters
+
+    def condense_fielders(self):
+        new_fielders = []
+        temp_fielder = None
+        for f in self.fielders:
+            if temp_fielder == None:
+                temp_fielder = f
+            elif temp_fielder.playerID != f.playerID:
+                new_fielders.append(temp_fielder)
+                temp_fielder = f
+            else:
+                combined_f = temp_fielder.combine_fielder(f)
+                temp_fielder = combined_f
+        new_fielders.append(temp_fielder)
+        self.fielders = new_fielders
+
+        new_fielders = []
+        temp_fielder = None
+        for f in self.fielders:
+            if temp_fielder == None:
+                temp_fielder = f
+            elif temp_fielder.playerID != f.playerID:
+                new_fielders.append(temp_fielder)
+                temp_fielder = f
+            else:
+                combined_f = temp_fielder.combine_fielder_pos(f)
+                temp_fielder = combined_f
+        new_fielders.append(temp_fielder)
+        self.fielders = new_fielders
 
     def calculate_avg_batter(self):
         g = 0

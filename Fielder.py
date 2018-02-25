@@ -14,11 +14,11 @@ class Fielder:
         self.a = a
         self.e = e
         self.dp = dp
-        self.pb = pb
-        self.wp = wp
-        self.sb = sb
-        self.cs = cs
-        self.zr = zr
+        self.pb = pb if pb is int else 0
+        self.wp = wp if wp is int else 0
+        self.sb = sb if sb is int else 0
+        self.cs = cs if cs is int else 0
+        self.zr = zr if zr is int else 0
 
     def combine_fielder(self, other):
         return Fielder(self.firstName, self.lastName, self.playerID, 1, other.teamID, self.pos, self.g + other.g,
