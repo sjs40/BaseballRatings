@@ -14,6 +14,8 @@ class League:
         self.mlb_power_stats = []
         self.mlb_ab = []
         self.mlb_slg = []
+        self.mlb_ba = []
+        self.mlb_iso = []
         self.mlb_hr = []
         self.teamIDs = ['ARI', 'ATL', 'BAL', 'BOS', 'CHA', 'CHN', 'CIN', 'CLE', 'COL', 'DET',
                         'HOU', 'KCA', 'LAA', 'LAN', 'MIA', 'MIL', 'MIN', 'NYA', 'NYN', 'OAK',
@@ -35,6 +37,8 @@ class League:
                 temp_batter = b
             elif temp_batter.playerID != b.playerID:
                 new_batters.append(temp_batter)
+                temp_batter = b
+            elif temp_batter.stint == 1 and b.stint == 1:
                 temp_batter = b
             else:
                 combined_b = temp_batter.combine_batter(b)
@@ -130,20 +134,25 @@ class League:
         self.mlb_ab = []
         self.mlb_hr = []
         self.mlb_slg = []
+        self.mlb_ba = []
+        self.mlb_iso = []
         for b in self.batters:
             hr_per_h = (b.hr / b.h) if b.h != 0 else 0
             self.mlb_hr_per_h.append(hr_per_h)
             self.mlb_power_stats.append((hr_per_h * .85) + (b.slg * .15))
             self.mlb_ab.append(b.ab)
             self.mlb_slg.append(b.slg)
+            self.mlb_ba.append(b.ba)
+            self.mlb_iso.append(b.slg - b.ab)
             if b.hr > 0:
                 self.mlb_hr.append(b.hr)
 
     def set_batter_ratings(self):
         self.get_mlb_lists()
         for b in self.batters:
-            b.get_power_rating(self)
-            b.get_speed_score()
+            b.set_power_rating(self)
+            b.set_speed_score()
+            b.set_contact_rating()
 
     def set_players(self):
         for b, f in zip(self.batters, self.fielders):
@@ -152,3 +161,4 @@ class League:
                 player.set_speed_label()
                 self.players.append(player)
                 self.teams[player.teamID].add_player(player)
+

@@ -30,10 +30,13 @@ class Batter:
         self.sh = float(sh)
         self.sf = float(sf)
         self.gidp = float(gidp)
-        self.power_rate = 0
+        self.ba = float(self.h / self.ab) if self.ab != 0 else 0.0
         self.slg = float((self.h + self.b2 + (self.b3 * 2) + (self.hr * 3)) / self.ab) if self.ab != 0 else 0.0
         self.pct_hr = 0
+
+        self.power_rate = 0
         self.speed_score = 0
+        self.contact_rate = 0
 
     def set_position(self, pos):
         self.position = pos
@@ -50,21 +53,13 @@ class Batter:
                       self.hbp + other.hbp, self.sh + other.sh, self.sf + other.sf,
                       self.gidp + other.gidp)
 
-    def get_power_rating(self, league):
+    def set_power_rating(self, league):
         hr_per_h = self.hr / self.h if self.h != 0 else 0
         pct_hr_per_h = stats.percentileofscore(league.mlb_hr_per_h, hr_per_h)
         pct_ab = stats.percentileofscore(league.mlb_ab, self.ab)
         pct_slg = stats.percentileofscore(league.mlb_slg, self.slg)
         self.pct_hr = stats.percentileofscore(league.mlb_hr, self.hr)
-
-        if pct_ab > 80:
-            ab_multiplier = 1.0
-        elif pct_ab > 60:
-            ab_multiplier = .8
-        elif pct_ab > 40:
-            ab_multiplier = .6
-        else:
-            ab_multiplier = .4
+        iso = self.slg - self.ba
 
         if self.pct_hr > 80:
             hr_multiplier = 1.0
@@ -77,6 +72,27 @@ class Batter:
         else:
             hr_multiplier = 0.3
         self.power_rate = ((pct_hr_per_h * 0.85) + (pct_slg * 0.15)) * hr_multiplier
+
+    def set_contact_rating(self):
+        ba_weight = (25.0 / self.ba) if self.ba != 0.0 else 0.0
+        if self.h < 25:
+            self.contact_rate = 45
+        elif self.h < 75:
+            self.contact_rate = ba_weight * .55
+        elif self.h < 125:
+            self.contact_rate = ba_weight * .7
+        elif self.h < 175:
+            self.contact_rate = ba_weight * .85
+        elif self.h < 225:
+            self.contact_rate = ba_weight * .95
+        else:
+            self.contact_rate = ba_weight
+
+        if self.contact_rate < 30:
+            self.contact_rate = 30
+
+
+
 
     def get_f1(self):
         term1 = ((1.0 * (self.sb + 3)) / (1.0 * (self.sb + self.cs + 7))) if (self.sb + self.cs + 7) != 0 else 0

@@ -30,6 +30,7 @@ for row in cur:
                     row['AB'], row['R'], row['H'], row['2B'], row['3B'], row['HR'],
                     row['RBI'], row['SB'], row['CS'], row['BB'], row['SO'], row['IBB'],
                     row['HBP'], row['SH'], row['SF'], row['GIDP'])
+    print(row['nameFirst'] + " " + row['nameLast'] + " hits: " + str(row['H']))
     batters.append(batter)
 
     fielder = Fielder(row['nameFirst'], row['nameLast'], row['Fielding.playerID'], row['Fielding.stint'],
@@ -49,6 +50,8 @@ league = League(batters, fielders)
 league.condense_batters()
 league.condense_fielders()
 league.set_players()
+league.set_batter_ratings()
+league.get_mlb_lists()
 
 '''
 for b in league.batters:
@@ -76,4 +79,4 @@ for b in team.batters:
 
 team = league.teams['CHN']
 for p in team.players:
-    print(p.firstName + " " + p.lastName + " " + p.position + " Speed score: " + str(p.speed_score))
+    print(p.firstName + " " + p.lastName + " " + p.position + " Contact Rate: " + str(p.batter.contact_rate) + " Hits: " + str(p.batter.h))

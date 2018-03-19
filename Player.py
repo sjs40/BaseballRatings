@@ -7,7 +7,9 @@ class Player:
         self.teamID = batter.teamID
         self.batter = batter
         self.fielder = fielder
+
         self.speed_score = 0
+        self.contact_rate = 0
 
     def set_speed_label(self):
         self.batter.set_speed_score()
