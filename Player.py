@@ -1,31 +1,49 @@
+from Utils import Utils
+
 class Player:
 
-    def __init__(self, batter, fielder):
-        self.firstName = batter.firstName
-        self.lastName = batter.lastName
-        self.position = fielder.pos
-        self.teamID = batter.teamID
-        self.batter = batter
-        self.fielder = fielder
+  def __init__(self, row):
+    self.playerID = row['playerID']
+    self.teamID = row['teamID']
+    self.g = row['g']
+    self.ab = row['ab']
+    self.r = row['r']
+    self.h = row['h']
+    self.b2 = row['2b']
+    self.b3 = row['3b']
+    self.hr = row['hr']
+    self.rbi = row['rbi']
+    self.sb = row['sb']
+    self.cs = row['cs']
+    self.bb = row['bb']
+    self.so = row['so']
+    self.ibb = row['ibb']
+    self.hbp = row['hbp']
+    self.sh = row['sh']
+    self.sf = row['sf']
+    self.gdp = row['gdp']
+    self.birthCountry = row['country']
+    self.birthYear = row['birthYear']
+    self.birthMonth = row['birthMonth']
+    self.birthDay = row['birthDay']
+    self.nameFirst = row['nameFirst']
+    self.nameLast = row['nameLast']
+    self.weight = row['weight']
+    self.height = row['height']
+    self.bat = row['bat']
+    self.throw = row['throw']
 
-        self.speed_score = 0
-        self.contact_rate = 0
+  def get_stats_str(self):
+    return 'G: ' + str(self.g) + '\nAB: ' + str(self.ab) + '\nR: ' + str(self.r) + '\nH: ' + str(self.h) + '\n2B: ' \
+           + str(self.b2) + '\n3B: ' + str(self.b3) + '\nHR: ' + str(self.hr) + '\nRBI: ' + str(self.rbi) + '\nSB: ' \
+           + str(self.sb) + '\nCS: ' + str(self.cs) + '\nBB: ' + str(self.bb) + '\nSO: ' + str(self.so) + '\nIBB: ' \
+           + str(self.ibb) + '\nHBP: ' + str(self.hbp) + '\nSH: ' + str(self.sh) + '\nSF: ' + str(self.sf) + '\nGDP: ' \
+           + str(self.gdp) + '\n'
 
-    def set_speed_label(self):
-        self.batter.set_speed_score()
-        speed_score_top = self.batter.speed_score
-        term1 = (1.0 * (self.fielder.po + self.fielder.a)) / (1.0 * self.fielder.g) if self.fielder.g != 0 else 0
-        if self.position == 'C':
-            speed_score_top += 1
-        elif self.position == '1B':
-            speed_score_top += 2
-        elif self.position == '2B':
-            speed_score_top += ((term1 / 4.8) * 6)
-        elif self.position == '3B':
-            speed_score_top += ((term1 / 2.65) * 4)
-        elif self.position == 'SS':
-            speed_score_top += ((term1 / 4.6) * 7)
-        elif self.position == 'OF':
-            speed_score_top += ((term1 / 2.0) * 6)
+  def get_player_name_str(self):
+    return self.nameFirst + ' ' + self.nameLast
 
-        self.speed_score = round(speed_score_top / 6, 2)
+  def get_player_info(self):
+    return 'Height: ' + Utils.inches_to_feet(self.height) + ' Weight: ' + str(self.weight) + 'lbs\nBorn: ' + \
+      str(self.birthMonth) + '/' + str(self.birthDay) + '/' + str(self.birthYear) + '\nCountry: ' + \
+      self.birthCountry + '\nBats: ' + self.bat + ' Throws: ' + self.throw + '\n'

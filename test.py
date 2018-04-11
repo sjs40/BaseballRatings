@@ -1,82 +1,59 @@
 import pymysql
-from Batter import Batter
-from Fielder import Fielder
-from League import League
+from Bat import Bat
+from Pitch import Pitch
 from Team import Team
+from League import League
+from Game import Game
+from Player import Player
 import config
 
 db = pymysql.connect(host=config.host, port=config.port, user=config.user, database=config.database, password=config.password)
 cur = db.cursor(pymysql.cursors.DictCursor)
 
-#sql = "SELECT Batting.*, MasterTable.nameFirst, MasterTable.nameLast FROM Batting, MasterTable WHERE yearID = 2016 AND MasterTable.playerID = Batting.playerID;"
+sql = "CALL get_batter_by_name('Kris', 'Bryant');"
 
-sql = "SELECT Batting.*, Fielding.*, MasterTable.nameFirst, MasterTable.nameLast " \
-            "FROM Batting, Fielding, MasterTable " \
-            "WHERE Batting.yearID = 2016 AND Fielding.yearID = 2016 " \
-            "AND Batting.playerID = MasterTable.playerID " \
-            "AND MasterTable.playerID = Fielding.playerID;"
-
-
-batters = []
-fielders = []
-prev_fielder = None
 cur.execute(sql)
 
+league = League(db)
+
+'''
+bats = []
+pitches = []
 for row in cur:
-    batter = Batter(row['nameFirst'], row['nameLast'],
-                    row['playerID'],
-                    row['stint'],
-                    row['teamID'], row['lgID'], row['G'],
-                    row['AB'], row['R'], row['H'], row['2B'], row['3B'], row['HR'],
-                    row['RBI'], row['SB'], row['CS'], row['BB'], row['SO'], row['IBB'],
-                    row['HBP'], row['SH'], row['SF'], row['GIDP'])
-    print(row['nameFirst'] + " " + row['nameLast'] + " hits: " + str(row['H']))
-    batters.append(batter)
+    id = row['teamID']
+    bat = Bat(id, db)
+    bat.set_power_rating(league.b_hr, league.b_slg)
+    bat.set_contact_rating(league.b_ba, league.b_obp, league.b_h)
+    bat.set_scoring_rating(league.b_hr, league.b_rbi, league.b_r)
+    bat.set_overall_rating()
+    bats.append(bat)
+    print(id + " Power: " + str(int(round(bat.power, 0))) + " Contact: " + str(int(round(bat.contact, 0)))
+          + " Scoring: " + str(int(round(bat.scoring, 0))) + " Overall: " + str(int(round(bat.overall, 0))))
 
-    fielder = Fielder(row['nameFirst'], row['nameLast'], row['Fielding.playerID'], row['Fielding.stint'],
-                      row['Fielding.teamID'], row['POS'], row['Fielding.G'], row['GS'], row['InnOuts'],
-                      row['PO'], row['A'], row['E'], row['DP'], row['PB'], row['WP'], row['Fielding.SB'],
-                      row['Fielding.CS'], row['ZR'])
+    pitch = Pitch(id, db)
+    pitch.set_vs_power_rating(league.p_hr, league.p_hr9)
+    pitch.set_vs_contact_rating(league.p_so, league.p_h, league.p_h9, league.p_whip)
+    pitch.set_scoring_rating(league.p_era, league.p_whip, league.p_r)
+    pitch.set_overall_rating()
+    pitches.append(pitch)
+    print(id + " vs Power: " + str(int(round(pitch.vs_power, 0)))
+          + " vs Contact: " + str(int(round(pitch.vs_contact, 0)))
+          + " Scoring: " + str(int(round(pitch.scoring, 0)))
+          + " Overall: " + str(int(round(pitch.overall, 0))))
 
-    if prev_fielder == None:
-        fielders.append(fielder)
-        prev_fielder = fielder
-    elif prev_fielder.playerID != fielder.playerID or prev_fielder.pos != fielder.pos or prev_fielder.stint != fielder.stint:
-        fielders.append(fielder)
-        prev_fielder = fielder
-
-
-league = League(batters, fielders)
-league.condense_batters()
-league.condense_fielders()
-league.set_players()
-league.set_batter_ratings()
-league.get_mlb_lists()
-
-'''
-for b in league.batters:
-    sql_position = "SELECT POS, G FROM Fielding WHERE yearID = 2016 AND playerID = \'" + b.playerID + "\';"
-    prime_pos = "N/A"
-    games = 0
-    cursor = db.cursor()
-    cursor.execute(sql_position)
-    for row in cursor:
-        if int(row[1]) > games:
-            prime_pos = row[0]
-    b.set_position(prime_pos)
-
-
-league.calculate_avg_batter()
-league.set_batter_ratings()
-
-team = Team(league.batters, 'CHN')
-for b in team.batters:
-    print(
-        b.firstName + " "
-        + b.lastName + " "
-        + b.position + " Speed: " + b.speed_label)
+games = []
+for row in cur:
+  date = str(row['date'])
+  day = row['day']
+  vis_team = row['vis']
+  home_team = row['home']
+  time = row['time']
+  game = Game(date, day, home_team, vis_team, time, league, db)
+  games.append(game)
+  print(game.get_game_odds())
 '''
 
-team = league.teams['CHN']
-for p in team.players:
-    print(p.firstName + " " + p.lastName + " " + p.position + " Contact Rate: " + str(p.batter.contact_rate) + " Hits: " + str(p.batter.h))
+for row in cur:
+  player = Player(row)
+  print(player.get_player_name_str())
+  print(player.get_player_info())
